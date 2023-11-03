@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -31,7 +30,7 @@ export class UserService {
 
       return user;
     } catch {
-      throw new HttpErrorByCode[500]();
+      throw new ForbiddenException('username not available');
     }
   }
 }

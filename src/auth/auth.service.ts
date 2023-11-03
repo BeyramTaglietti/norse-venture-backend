@@ -4,11 +4,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { CreateUserDto } from 'src/user/dto';
 
 @Injectable()
 export class AuthService {
@@ -53,12 +51,11 @@ export class AuthService {
 
   async registerUser(user: { email: string; picture?: string }) {
     try {
-      const userData: CreateUserDto = {
-        email: user.email,
-        picture: user.picture ?? '',
-      };
       const newUser = await this.prismaService.user.create({
-        data: userData as User,
+        data: {
+          email: user.email,
+          picture: user.picture,
+        },
       });
 
       const token = this.generateJWT({

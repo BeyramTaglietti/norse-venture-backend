@@ -1,18 +1,11 @@
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { UserService } from './user.service';
 import { GetUser } from 'src/auth/decorators';
 import { User } from '@prisma/client';
-import { ChangeUsernameDto } from './dto/user-dto';
-import { z } from 'zod';
+import { ChangeUsernameDto, usernameSchema } from './dto/user-dto';
+import { ZodError } from 'zod';
+import { ZodValidationException } from 'nestjs-zod';
 
 @Controller('user')
 export class UserController {
@@ -22,11 +15,14 @@ export class UserController {
   async usernameAvailable(
     @Query('username') username: string,
   ): Promise<boolean> {
-    const result = z.string().safeParse(username);
-
-    if (result.success)
+    try {
+      usernameSchema.parse(username);
       return await this.userService.usernameAvailable(username);
-    else throw new ForbiddenException('username not given');
+    } catch (err) {
+      if (err instanceof ZodError) {
+        throw new ZodValidationException(err);
+      }
+    }
   }
 
   @Post('set_username')
