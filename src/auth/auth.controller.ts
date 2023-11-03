@@ -10,7 +10,7 @@ export class AuthController {
 
   @Get('is_authenticated')
   @UseGuards(JwtAuthGuard)
-  isAuthenticated(@GetUser() user: User) {
+  isAuthenticated(@GetUser() user: User): User {
     return user;
   }
 
@@ -20,7 +20,10 @@ export class AuthController {
 
   @Get('redirect')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthRedirect(@Req() req) {
+  async googleAuthRedirect(@Req() req): Promise<{
+    access_token: string;
+    first_login: boolean;
+  }> {
     const access_token = await this.authService.signIn(req.user);
     return access_token;
   }

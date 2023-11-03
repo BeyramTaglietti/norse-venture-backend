@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { TripService } from './trip.service';
-import { TripDto } from './dto/trip.dto';
+
 import { Trip } from '@prisma/client';
+import { TripDto } from './dto';
 
 @Controller('trip')
 export class TripController {
