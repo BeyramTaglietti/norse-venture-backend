@@ -7,9 +7,17 @@ import { TripModule } from './trip/trip.module';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), TripModule, PrismaModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TripModule,
+    PrismaModule,
+    AuthModule,
+    UserModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

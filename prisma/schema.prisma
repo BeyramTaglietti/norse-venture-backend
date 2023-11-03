@@ -11,6 +11,19 @@ datasource db {
 }
 
 model Trip {
-  id        Int      @default(autoincrement()) @id
-  title     String
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title String
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email    String @unique
+  username String? @unique
+  picture  String
 }
