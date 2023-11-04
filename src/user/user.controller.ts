@@ -7,6 +7,7 @@ import { ChangeUsernameDto, usernameSchema } from './dto/user-dto';
 import { ZodError } from 'zod';
 import { ZodValidationException } from 'nestjs-zod';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -26,7 +27,6 @@ export class UserController {
   }
 
   @Post('set_username')
-  @UseGuards(JwtAuthGuard)
   async setUsername(
     @GetUser() user: User,
     @Body() body: ChangeUsernameDto,

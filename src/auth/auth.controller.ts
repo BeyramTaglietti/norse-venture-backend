@@ -20,11 +20,11 @@ export class AuthController {
 
   @Get('redirect')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthRedirect(@Req() req): Promise<{
+  googleAuthRedirect(@Req() req): Promise<{
     access_token: string;
     first_login: boolean;
   }> {
-    const access_token = await this.authService.signIn(req.user);
+    const access_token = this.authService.signIn(req.user);
     return access_token;
   }
 }

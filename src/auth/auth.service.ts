@@ -19,7 +19,7 @@ export class AuthService {
   generateJWT(payload: JwtPayload): string {
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '1h',
+      expiresIn: '10d',
     });
   }
 
@@ -68,7 +68,6 @@ export class AuthService {
         first_login: true,
       };
     } catch (e) {
-      console.log(e);
       throw new InternalServerErrorException();
     }
   }
