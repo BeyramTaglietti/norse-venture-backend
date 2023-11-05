@@ -19,9 +19,10 @@ model Trip {
   background String?
   date       DateTime
 
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId Int
-  Task    Task[]
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      Int
+  tasks        Task[]
+  partecipants UserInTrip[]
 }
 
 model Task {
@@ -38,13 +39,24 @@ model Task {
   tripId Int
 }
 
+model UserInTrip {
+  trip   Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId Int
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@id([tripId, userId])
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email    String  @unique
-  username String? @unique
+  email    String       @unique
+  username String?      @unique
   picture  String
   Trip     Trip[]
+  trips    UserInTrip[]
 }

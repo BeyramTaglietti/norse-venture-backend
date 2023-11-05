@@ -4,10 +4,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
+
+  async getUsersByUsername(username: string) {
+    return this.prisma.user.findMany({
+      where: {
+        username: {
+          contains: username,
+        },
+      },
+    });
+  }
 
   async usernameAvailable(username: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         username,
       },
@@ -19,7 +29,7 @@ export class UserService {
 
   async setUsername(userId: number, username: string): Promise<User> {
     try {
-      const user = await this.prismaService.user.update({
+      const user = await this.prisma.user.update({
         where: {
           id: userId,
         },
