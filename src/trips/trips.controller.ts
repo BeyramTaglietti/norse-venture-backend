@@ -14,7 +14,9 @@ import { Trip, User } from '@prisma/client';
 import { CreateTripDto } from './dto';
 import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('trips')
 export class TripsController {

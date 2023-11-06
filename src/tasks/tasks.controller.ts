@@ -14,7 +14,9 @@ import { GetUser } from 'src/auth/decorators';
 import { Task, User } from '@prisma/client';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('trips/:tripId/tasks')
 export class TasksController {

@@ -5,7 +5,9 @@ import { GetUser } from 'src/auth/decorators';
 import { User } from '@prisma/client';
 import { ChangeUsernameDto } from './dto/user-dto';
 import { UsernameValidationPipe } from './pipes';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {

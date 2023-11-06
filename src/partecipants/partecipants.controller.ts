@@ -13,7 +13,9 @@ import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { PartecipantsService } from './partecipants.service';
 import { AddPartecipantDto } from './dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('trips/:tripId/partecipants')
 export class PartecipantsController {

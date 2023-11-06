@@ -3,11 +3,13 @@ import { AuthService } from './auth.service';
 import { GoogleOauthGuard, JwtAuthGuard } from './guards';
 import { GetUser } from './decorators';
 import { User } from '@prisma/client';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBearerAuth()
   @Get('is_authenticated')
   @UseGuards(JwtAuthGuard)
   isAuthenticated(@GetUser() user: User): User {

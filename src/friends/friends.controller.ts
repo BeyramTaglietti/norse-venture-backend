@@ -12,7 +12,9 @@ import { JwtAuthGuard } from 'src/auth/guards';
 import { FriendsService } from './friends.service';
 
 import { User } from '@prisma/client';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('friends')
 export class FriendsController {

@@ -4,7 +4,9 @@ import { GetUser } from 'src/auth/decorators';
 import { FriendRequest, User } from '@prisma/client';
 import { AddFriendRequestDto, PatchFriendRequestDto } from './dto';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('friend_requests')
 export class FriendRequestsController {

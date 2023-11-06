@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const usernameSchema = z
   .string()
   .min(4)
+  .max(20)
   .regex(/^[a-z0-9]+$/, {
     message: 'No whitespaces, special characters or uppercase letters allowed',
   });
