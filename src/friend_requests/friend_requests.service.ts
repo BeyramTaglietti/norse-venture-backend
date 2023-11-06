@@ -135,7 +135,6 @@ export class FriendRequestsService {
 
       return friend;
     } catch (e) {
-      console.log(e);
       throw new InternalServerErrorException('Could not accept friend request');
     }
   }

@@ -13,6 +13,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { PartecipantsModule } from './partecipants/partecipants.module';
 import { FriendsModule } from './friends/friends.module';
 import { FriendRequestsModule } from './friend_requests/friend_requests.module';
+import { UnsplashModule } from './unsplash/unsplash.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FriendRequestsModule } from './friend_requests/friend_requests.module';
     PartecipantsModule,
     FriendsModule,
     FriendRequestsModule,
+    UnsplashModule,
   ],
   controllers: [AppController],
   providers: [
