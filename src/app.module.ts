@@ -11,6 +11,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TasksModule } from './tasks/tasks.module';
 import { PartecipantsModule } from './partecipants/partecipants.module';
+import { FriendsModule } from './friends/friends.module';
+import { FriendRequestsModule } from './friend_requests/friend_requests.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { PartecipantsModule } from './partecipants/partecipants.module';
     UserModule,
     TasksModule,
     PartecipantsModule,
+    FriendsModule,
+    FriendRequestsModule,
   ],
   controllers: [AppController],
   providers: [

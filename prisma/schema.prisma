@@ -19,7 +19,7 @@ model Trip {
   background String?
   date       DateTime
 
-  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner        User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId      Int
   tasks        Task[]
   partecipants UserInTrip[]
@@ -59,4 +59,22 @@ model User {
   picture  String
   Trip     Trip[]
   trips    UserInTrip[]
+
+  friends         User[] @relation("friends")
+  friendsRelation User[] @relation("friends")
+
+  sentFriendRequests     FriendRequest[] @relation("sentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
+}
+
+model FriendRequest {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender   User @relation(name: "sentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId Int  @unique
+
+  receiver   User @relation(name: "receivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId Int  @unique
 }
