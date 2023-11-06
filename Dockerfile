@@ -16,4 +16,4 @@ ENV PORT "8080"
 
 EXPOSE ${PORT}
 
-CMD [ "npm", "run", "start:dev"]
+CMD [ "npm", "run", "start:prod"]
