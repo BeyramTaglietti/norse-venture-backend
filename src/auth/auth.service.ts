@@ -45,7 +45,7 @@ export class AuthService {
 
     return {
       access_token: token,
-      first_login: !!userExists.username,
+      first_login: !userExists.username,
     };
   }
 
