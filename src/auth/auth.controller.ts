@@ -24,7 +24,7 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   googleAuthRedirect(@Req() req): Promise<{
     access_token: string;
-    first_login: boolean;
+    logged: boolean;
   }> {
     const access_token = this.authService.signIn(req.user);
     return access_token;

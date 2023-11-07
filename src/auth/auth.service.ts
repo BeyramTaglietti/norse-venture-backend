@@ -45,7 +45,7 @@ export class AuthService {
 
     return {
       access_token: token,
-      first_login: !userExists.username,
+      logged: !userExists.username,
     };
   }
 
@@ -65,7 +65,7 @@ export class AuthService {
 
       return {
         access_token: token,
-        first_login: true,
+        logged: true,
       };
     } catch (e) {
       throw new InternalServerErrorException();
