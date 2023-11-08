@@ -26,6 +26,9 @@ export class FriendRequestsService {
       },
     });
 
+    if (!receivedFriendRequests)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
     return receivedFriendRequests;
   }
 
@@ -38,6 +41,9 @@ export class FriendRequestsService {
         sentFriendRequests: true,
       },
     });
+
+    if (!receivedFriendRequests)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
     return receivedFriendRequests.sentFriendRequests;
   }
@@ -77,7 +83,7 @@ export class FriendRequestsService {
             'Friend request already exists',
             HttpStatus.CONFLICT,
           );
-        }
+        } else throw new InternalServerErrorException();
       } else {
         throw new InternalServerErrorException();
       }
@@ -133,7 +139,7 @@ export class FriendRequestsService {
 
       await Promise.all(promises);
 
-      return friend;
+      return friend!;
     } catch (e) {
       throw new InternalServerErrorException('Could not accept friend request');
     }

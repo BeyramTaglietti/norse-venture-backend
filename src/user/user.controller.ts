@@ -13,6 +13,11 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @Get('me')
+  async getCurrentUserInfo(@GetUser() user: User) {
+    return user;
+  }
+
   @Get()
   async getUsersByUsername(
     @Query('username', UsernameValidationPipe) username: string,
