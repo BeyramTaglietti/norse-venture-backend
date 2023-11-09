@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { Token } from './types';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { User } from '@prisma/client';
 
 const WEB_CLIENT_ID =
   '396754043936-2ct9hmupdh1bhts91j2ujosg0uj5jrqj.apps.googleusercontent.com';
@@ -61,7 +62,7 @@ export class AuthService {
     }
   }
 
-  async login(token: string): Promise<Token> {
+  async login(token: string): Promise<Token & { user: User }> {
     const payload = await this.verifyToken(token);
 
     const userExists = await this.prismaService.user.findUnique({
@@ -81,10 +82,14 @@ export class AuthService {
 
     return {
       access_token: generatedToken,
+      user: userExists,
     };
   }
 
-  async register(google_token: string, username: string): Promise<Token> {
+  async register(
+    google_token: string,
+    username: string,
+  ): Promise<Token & { user: User }> {
     const payload = await this.verifyToken(google_token);
 
     if (!payload.email)
@@ -108,6 +113,7 @@ export class AuthService {
 
       return {
         access_token: token,
+        user: newUser,
       };
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {

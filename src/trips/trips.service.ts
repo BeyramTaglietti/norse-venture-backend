@@ -12,7 +12,22 @@ export class TripsService {
   constructor(private prisma: PrismaService) {}
 
   async getTrips(userId: number): Promise<Trip[]> {
-    return await this.prisma.trip.findMany({ where: { ownerId: userId } });
+    return await this.prisma.trip.findMany({
+      where: { ownerId: userId },
+      include: {
+        partecipants: true,
+      },
+    });
+  }
+
+  async getTrip(userId: number, tripId: number): Promise<Trip> {
+    const trip = await this.prisma.trip.findUnique({
+      where: { ownerId: userId, id: tripId },
+    });
+
+    if (!trip) throw new HttpException('Trip not found', 404);
+
+    return trip;
   }
 
   async createTrip(trip: Trip, userId: number): Promise<Trip> {

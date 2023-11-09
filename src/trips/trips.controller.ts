@@ -27,6 +27,14 @@ export class TripsController {
     return this.tripService.getTrips(user.id);
   }
 
+  @Get(':tripId')
+  getTrip(
+    @GetUser() user: User,
+    @Param('tripId', ParseIntPipe) tripId: number,
+  ): Promise<Trip> {
+    return this.tripService.getTrip(user.id, tripId);
+  }
+
   @Post()
   createTrip(@Body() trip: CreateTripDto, @GetUser() user: User) {
     return this.tripService.createTrip(trip as Trip, user.id);
