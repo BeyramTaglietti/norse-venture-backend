@@ -44,12 +44,14 @@ export class PartecipantsService {
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
     try {
-      return await this.prisma.userInTrip.create({
+      const addedPartecipant = await this.prisma.userInTrip.create({
         data: {
           userId: partecipantId,
           tripId,
         },
       });
+
+      return addedPartecipant;
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
@@ -57,7 +59,7 @@ export class PartecipantsService {
             'Partecipant already exists',
             HttpStatus.CONFLICT,
           );
-        }
+        } else throw new InternalServerErrorException();
       } else {
         throw new InternalServerErrorException();
       }
@@ -79,10 +81,9 @@ export class PartecipantsService {
         id: tripId,
       },
     });
+    if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
     const ownerId = trip.ownerId;
-
-    if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
     // owner or non-owner is deleting owner
     if (ownerId === partecipantId) {

@@ -1,9 +1,11 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleOauthGuard, JwtAuthGuard } from './guards';
+import { JwtAuthGuard } from './guards';
 import { GetUser } from './decorators';
 import { User } from '@prisma/client';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { LoginDto, RegisterDto } from './dto';
+import { Token } from './types';
 
 @Controller('auth')
 export class AuthController {
@@ -16,17 +18,16 @@ export class AuthController {
     return user;
   }
 
-  @Get('login')
-  @UseGuards(GoogleOauthGuard)
-  async auth() {}
+  @Post('login')
+  login(@Body() loginBody: LoginDto): Promise<Token> {
+    return this.authService.login(loginBody.google_token);
+  }
 
-  @Get('redirect')
-  @UseGuards(GoogleOauthGuard)
-  googleAuthRedirect(@Req() req): Promise<{
-    access_token: string;
-    logged: boolean;
-  }> {
-    const access_token = this.authService.signIn(req.user);
-    return access_token;
+  @Post('register')
+  register(@Body() registerBody: RegisterDto): Promise<Token> {
+    return this.authService.register(
+      registerBody.google_token,
+      registerBody.username,
+    );
   }
 }

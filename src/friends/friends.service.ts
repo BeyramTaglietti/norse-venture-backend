@@ -22,6 +22,9 @@ export class FriendsService {
       },
     });
 
+    if (!foundUser)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
     return foundUser.friends;
   }
 
@@ -67,7 +70,7 @@ export class FriendsService {
 
       await Promise.all(promises);
 
-      return deletedUser;
+      return deletedUser!;
     } catch {
       throw new InternalServerErrorException();
     }
