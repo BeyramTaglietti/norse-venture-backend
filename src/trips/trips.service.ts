@@ -4,7 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Trip } from '@prisma/client';
+import { Trip, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -12,12 +12,14 @@ export class TripsService {
   constructor(private prisma: PrismaService) {}
 
   async getTrips(userId: number): Promise<Trip[]> {
-    return await this.prisma.trip.findMany({
+    const trips = await this.prisma.trip.findMany({
       where: { ownerId: userId },
       include: {
         partecipants: true,
       },
     });
+
+    return trips;
   }
 
   async getTrip(userId: number, tripId: number): Promise<Trip> {
@@ -28,6 +30,21 @@ export class TripsService {
     if (!trip) throw new HttpException('Trip not found', 404);
 
     return trip;
+  }
+
+  async getTripPartecipants(userId: number, tripId: number): Promise<User[]> {
+    const trip = await this.prisma.trip.findUnique({
+      where: { ownerId: userId, id: tripId },
+      include: {
+        partecipants: {
+          include: { user: true },
+        },
+      },
+    });
+
+    if (!trip) throw new HttpException('Trip not found', 404);
+
+    return trip.partecipants.map((x) => x.user);
   }
 
   async createTrip(trip: Trip, userId: number): Promise<Trip> {

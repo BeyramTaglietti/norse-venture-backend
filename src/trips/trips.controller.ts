@@ -23,7 +23,7 @@ export class TripsController {
   constructor(private tripService: TripsService) {}
 
   @Get()
-  getTrips(@GetUser() user: User): Promise<Trip[]> {
+  async getTrips(@GetUser() user: User): Promise<Trip[]> {
     return this.tripService.getTrips(user.id);
   }
 
@@ -33,6 +33,14 @@ export class TripsController {
     @Param('tripId', ParseIntPipe) tripId: number,
   ): Promise<Trip> {
     return this.tripService.getTrip(user.id, tripId);
+  }
+
+  @Get(':tripId/partecipants')
+  getTripPartecipants(
+    @GetUser() user: User,
+    @Param('tripId', ParseIntPipe) tripId: number,
+  ): Promise<User[]> {
+    return this.tripService.getTripPartecipants(user.id, tripId);
   }
 
   @Post()

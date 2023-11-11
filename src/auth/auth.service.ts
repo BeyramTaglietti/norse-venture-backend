@@ -37,7 +37,7 @@ export class AuthService {
   generateJWT(payload: JwtPayload): string {
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '10d',
+      expiresIn: '30d',
     });
   }
 
