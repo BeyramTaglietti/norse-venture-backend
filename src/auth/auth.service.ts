@@ -10,7 +10,6 @@ import type { JwtPayload } from './strategies/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { Token } from './types';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from '@prisma/client';
 
 @Injectable()
@@ -32,6 +31,20 @@ export class AuthService {
       configService.get('ANDROID_CLIENT_ID')!,
       configService.get('WEB_CLIENT_ID')!,
     ];
+  }
+
+  async getRandomUsername(): Promise<string> {
+    const username: string = 'User' + Math.floor(Math.random() * 10000000);
+
+    const userExists = await this.prismaService.user.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    if (userExists) this.getRandomUsername();
+
+    return username;
   }
 
   generateJWT(payload: JwtPayload): string {
@@ -69,59 +82,50 @@ export class AuthService {
     });
 
     if (!userExists) {
-      throw new HttpException('User not found', 404);
+      const user = await this.register(payload);
+
+      const generatedToken = this.generateJWT({
+        sub: user.id,
+        email: user.email,
+      });
+
+      return {
+        access_token: generatedToken,
+        user,
+      };
+    } else {
+      const generatedToken = this.generateJWT({
+        sub: userExists.id,
+        email: userExists.email,
+      });
+
+      return {
+        access_token: generatedToken,
+        user: userExists,
+      };
     }
-
-    const generatedToken = this.generateJWT({
-      sub: userExists.id,
-      email: userExists.email,
-    });
-
-    return {
-      access_token: generatedToken,
-      user: userExists,
-    };
   }
 
-  async register(
-    google_token: string,
-    username: string,
-  ): Promise<Token & { user: User }> {
-    const payload = await this.verifyToken(google_token);
-
+  async register(payload: TokenPayload): Promise<User> {
     if (!payload.email)
-      throw new InternalServerErrorException(
-        'Email not provided by google token',
+      throw new HttpException(
+        'Please provide an email address',
+        HttpStatus.BAD_REQUEST,
       );
 
     try {
+      const generatedUsername: string = await this.getRandomUsername();
+
       const newUser = await this.prismaService.user.create({
         data: {
           email: payload.email,
           picture: payload.picture ?? '',
-          username,
+          username: generatedUsername,
         },
       });
 
-      const token = this.generateJWT({
-        sub: newUser.id,
-        email: newUser.email,
-      });
-
-      return {
-        access_token: token,
-        user: newUser,
-      };
+      return newUser;
     } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
-        if (e.code === 'P2002') {
-          console.log(e);
-          throw new HttpException(
-            'Email or username already exists',
-            HttpStatus.CONFLICT,
-          );
-        }
-      }
       throw new InternalServerErrorException();
     }
   }

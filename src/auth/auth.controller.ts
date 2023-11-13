@@ -22,12 +22,4 @@ export class AuthController {
   login(@Body() loginBody: LoginDto): Promise<Token> {
     return this.authService.login(loginBody.google_token);
   }
-
-  @Post('register')
-  register(@Body() registerBody: RegisterDto): Promise<Token> {
-    return this.authService.register(
-      registerBody.google_token,
-      registerBody.username,
-    );
-  }
 }
