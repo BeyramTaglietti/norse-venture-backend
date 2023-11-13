@@ -4,7 +4,7 @@ import { JwtAuthGuard } from './guards';
 import { GetUser } from './decorators';
 import { User } from '@prisma/client';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto } from './dto';
 import { Token } from './types';
 
 @Controller('auth')
@@ -18,16 +18,8 @@ export class AuthController {
     return user;
   }
 
-  @Post('login')
+  @Post('google_login')
   login(@Body() loginBody: LoginDto): Promise<Token> {
     return this.authService.login(loginBody.google_token);
-  }
-
-  @Post('register')
-  register(@Body() registerBody: RegisterDto): Promise<Token> {
-    return this.authService.register(
-      registerBody.google_token,
-      registerBody.username,
-    );
   }
 }
