@@ -34,7 +34,7 @@ export class PartecipantsController {
     @Param('tripId', ParseIntPipe) tripId: number,
     @GetUser() user: User,
     @Body() partecipant: AddPartecipantDto,
-  ): Promise<UserInTrip> {
+  ): Promise<User> {
     return this.partecipantsService.addPartecipant(
       tripId,
       user.id,

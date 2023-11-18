@@ -35,14 +35,6 @@ export class TripsController {
     return this.tripService.getTrip(user.id, tripId);
   }
 
-  @Get(':tripId/partecipants')
-  getTripPartecipants(
-    @GetUser() user: User,
-    @Param('tripId', ParseIntPipe) tripId: number,
-  ): Promise<User[]> {
-    return this.tripService.getTripPartecipants(user.id, tripId);
-  }
-
   @Post()
   createTrip(@Body() trip: CreateTripDto, @GetUser() user: User) {
     return this.tripService.createTrip(trip as Trip, user.id);

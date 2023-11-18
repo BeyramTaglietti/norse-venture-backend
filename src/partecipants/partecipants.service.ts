@@ -13,6 +13,7 @@ export class PartecipantsService {
   constructor(private prisma: PrismaService) {}
 
   async getPartecipants(tripId: number, userId: number): Promise<User[]> {
+    console.log('here');
     const trip = await this.prisma.trip
       .findUnique({
         where: {
@@ -36,7 +37,7 @@ export class PartecipantsService {
     tripId: number,
     userId: number,
     partecipantId: number,
-  ): Promise<UserInTrip> {
+  ): Promise<User> {
     const trip = await this.prisma.trip.findUnique({
       where: { id: tripId, ownerId: userId },
     });
@@ -49,9 +50,12 @@ export class PartecipantsService {
           userId: partecipantId,
           tripId,
         },
+        include: {
+          user: true,
+        },
       });
 
-      return addedPartecipant;
+      return addedPartecipant.user;
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
