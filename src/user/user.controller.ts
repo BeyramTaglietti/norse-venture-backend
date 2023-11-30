@@ -19,29 +19,25 @@ export class UserController {
   }
 
   @Get()
-  async getUsersByUsername(
+  getUsersByUsername(
     @Query('username', UsernameValidationPipe) username: string,
+    @GetUser() user: User,
   ) {
-    return await this.userService.getUsersByUsername(username);
+    return this.userService.getUsersByUsername(username, user.id);
   }
 
   @Patch()
-  async setUsername(
+  setUsername(
     @GetUser() user: User,
     @Body() body: ChangeUsernameDto,
   ): Promise<User> {
-    const updatedUser = await this.userService.setUsername(
-      user.id,
-      body.username,
-    );
-
-    return updatedUser;
+    return this.userService.setUsername(user.id, body.username);
   }
 
   @Get('username_available')
-  async usernameAvailable(
+  usernameAvailable(
     @Query('username', UsernameValidationPipe) username: string,
   ): Promise<boolean> {
-    return await this.userService.usernameAvailable(username);
+    return this.userService.usernameAvailable(username);
   }
 }

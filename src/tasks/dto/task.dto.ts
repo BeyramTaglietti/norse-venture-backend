@@ -10,9 +10,9 @@ const CreateTaskSchema = z.object({
 export class CreateTaskDto extends createZodDto(CreateTaskSchema) {}
 
 const updateTaskSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  date: z.coerce.date().optional(),
+  title: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
+  date: z.coerce.date().optional().nullable(),
   value: z.boolean(),
 });
 

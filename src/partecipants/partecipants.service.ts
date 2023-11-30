@@ -44,6 +44,21 @@ export class PartecipantsService {
 
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        friends: true,
+      },
+    });
+
+    if (!user?.friends.find((x) => x.id === partecipantId))
+      throw new HttpException(
+        'Can only add friends to trip',
+        HttpStatus.FORBIDDEN,
+      );
+
     try {
       const addedPartecipant = await this.prisma.userInTrip.create({
         data: {

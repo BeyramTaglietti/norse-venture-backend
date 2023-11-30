@@ -6,14 +6,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async getUsersByUsername(username: string) {
-    return this.prisma.user.findMany({
+  async getUsersByUsername(username: string, userId: number): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
       where: {
         username: {
           contains: username,
         },
       },
     });
+
+    return users.filter((x) => x.id !== userId);
   }
 
   async usernameAvailable(username: string) {

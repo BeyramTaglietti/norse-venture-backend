@@ -13,39 +13,38 @@ export class FriendRequestsService {
   constructor(private prisma: PrismaService) {}
 
   async getFriendRequest(user: User): Promise<{
-    sentFriendRequests: FriendRequest[];
-    receivedFriendRequests: FriendRequest[];
+    sentFriendRequests: User[];
+    receivedFriendRequests: User[];
   }> {
-    const receivedFriendRequests = await this.prisma.user.findUnique({
+    const friendRequests = await this.prisma.user.findUnique({
       where: {
         id: user.id,
       },
       include: {
-        receivedFriendRequests: true,
-        sentFriendRequests: true,
+        receivedFriendRequests: {
+          include: {
+            sender: true,
+          },
+        },
+        sentFriendRequests: {
+          include: {
+            receiver: true,
+          },
+        },
       },
     });
 
-    if (!receivedFriendRequests)
+    if (!friendRequests)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    return receivedFriendRequests;
-  }
-
-  async getSentFriendRequest(user: User): Promise<FriendRequest[]> {
-    const receivedFriendRequests = await this.prisma.user.findUnique({
-      where: {
-        id: user.id,
-      },
-      include: {
-        sentFriendRequests: true,
-      },
-    });
-
-    if (!receivedFriendRequests)
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-
-    return receivedFriendRequests.sentFriendRequests;
+    return {
+      sentFriendRequests: friendRequests.sentFriendRequests.map(
+        (x) => x.receiver,
+      ),
+      receivedFriendRequests: friendRequests.receivedFriendRequests.map(
+        (x) => x.sender,
+      ),
+    };
   }
 
   async addFriendRequest(user: User, friendId: number): Promise<FriendRequest> {
@@ -70,6 +69,12 @@ export class FriendRequestsService {
       );
 
     try {
+      console.log({
+        data: {
+          receiverId: friendId,
+          senderId: user.id,
+        },
+      });
       return await this.prisma.friendRequest.create({
         data: {
           receiverId: friendId,

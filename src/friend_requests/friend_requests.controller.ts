@@ -13,16 +13,14 @@ export class FriendRequestsController {
   constructor(private friendRequstsService: FriendRequestsService) {}
 
   @Get('received')
-  async getReceivedFriendRequest(
-    @GetUser() user: User,
-  ): Promise<FriendRequest[]> {
+  async getReceivedFriendRequest(@GetUser() user: User): Promise<User[]> {
     const requests = await this.friendRequstsService.getFriendRequest(user);
 
     return requests.receivedFriendRequests;
   }
 
   @Get('sent')
-  async getSentFriendRequest(@GetUser() user: User): Promise<FriendRequest[]> {
+  async getSentFriendRequest(@GetUser() user: User): Promise<User[]> {
     const requests = await this.friendRequstsService.getFriendRequest(user);
 
     return requests.sentFriendRequests;
