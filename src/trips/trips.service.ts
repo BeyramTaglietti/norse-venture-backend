@@ -80,4 +80,22 @@ export class TripsService {
       throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
     }
   }
+
+  async editTrip(trip: Trip, userId: number, tripId: number): Promise<Trip> {
+    const tripFound = await this.prisma.trip.findUnique({
+      where: {
+        id: tripId,
+        ownerId: userId,
+      },
+    });
+
+    if (!tripFound) throw new HttpException('Trip not found', 404);
+
+    return await this.prisma.trip.update({
+      where: {
+        id: tripFound.id,
+      },
+      data: trip,
+    });
+  }
 }

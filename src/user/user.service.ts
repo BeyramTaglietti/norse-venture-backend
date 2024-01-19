@@ -45,4 +45,12 @@ export class UserService {
       throw new ForbiddenException('username not available');
     }
   }
+
+  async deleteAccount(user: User): Promise<void> {
+    await this.prisma.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+  }
 }

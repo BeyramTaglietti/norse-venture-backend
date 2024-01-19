@@ -6,15 +6,16 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { TripsService } from './trips.service';
 
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { Trip, User } from '@prisma/client';
-import { CreateTripDto } from './dto';
 import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateTripDto } from './dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -46,5 +47,14 @@ export class TripsController {
     @GetUser() user: User,
   ) {
     return this.tripService.deleteTrip(tripId, user.id);
+  }
+
+  @Put(':tripId')
+  editTrip(
+    @Param('tripId', ParseIntPipe) tripId: number,
+    @GetUser() user: User,
+    @Body() trip: CreateTripDto,
+  ) {
+    return this.tripService.editTrip(trip as Trip, user.id, tripId);
   }
 }

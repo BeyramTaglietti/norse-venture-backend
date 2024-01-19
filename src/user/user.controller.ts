@@ -1,11 +1,19 @@
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards';
-import { UserService } from './user.service';
-import { GetUser } from 'src/auth/decorators';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
 import { ChangeUsernameDto } from './dto/user-dto';
 import { UsernameValidationPipe } from './pipes';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { UserService } from './user.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -39,5 +47,10 @@ export class UserController {
     @Query('username', UsernameValidationPipe) username: string,
   ): Promise<boolean> {
     return this.userService.usernameAvailable(username);
+  }
+
+  @Delete('delete_account')
+  deleteAccount(@GetUser() user: User) {
+    return this.userService.deleteAccount(user);
   }
 }

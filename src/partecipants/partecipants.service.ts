@@ -13,7 +13,6 @@ export class PartecipantsService {
   constructor(private prisma: PrismaService) {}
 
   async getPartecipants(tripId: number, userId: number): Promise<User[]> {
-    console.log('here');
     const trip = await this.prisma.trip
       .findUnique({
         where: {
