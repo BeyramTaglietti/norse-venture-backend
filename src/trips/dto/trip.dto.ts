@@ -8,3 +8,4 @@ export const CreateTripSchema = z.object({
 });
 
 export class CreateTripDto extends createZodDto(CreateTripSchema) {}
+export type CreateTripType = z.infer<typeof CreateTripSchema>;

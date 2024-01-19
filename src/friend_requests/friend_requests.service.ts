@@ -69,12 +69,6 @@ export class FriendRequestsService {
       );
 
     try {
-      console.log({
-        data: {
-          receiverId: friendId,
-          senderId: user.id,
-        },
-      });
       return await this.prisma.friendRequest.create({
         data: {
           receiverId: friendId,

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Trip } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateTripType } from './dto';
 
 @Injectable()
 export class TripsService {
@@ -81,7 +82,11 @@ export class TripsService {
     }
   }
 
-  async editTrip(trip: Trip, userId: number, tripId: number): Promise<Trip> {
+  async editTrip(
+    trip: CreateTripType,
+    userId: number,
+    tripId: number,
+  ): Promise<Trip> {
     const tripFound = await this.prisma.trip.findUnique({
       where: {
         id: tripId,

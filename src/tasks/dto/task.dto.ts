@@ -17,3 +17,4 @@ const updateTaskSchema = z.object({
 });
 
 export class UpdateTaskDto extends createZodDto(updateTaskSchema) {}
+export type UpdateTaskType = z.infer<typeof updateTaskSchema>;

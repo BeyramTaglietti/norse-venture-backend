@@ -4,13 +4,13 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { JwtPayload } from './strategies/jwt.strategy';
-import { ConfigService } from '@nestjs/config';
-import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { Token } from './types';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {

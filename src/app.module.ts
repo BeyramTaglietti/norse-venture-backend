@@ -1,19 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaService } from './prisma/prisma.service';
-import { TripsModule } from './trips/trips.module';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { PrismaModule } from './prisma/prisma.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { TasksModule } from './tasks/tasks.module';
-import { PartecipantsModule } from './partecipants/partecipants.module';
-import { FriendsModule } from './friends/friends.module';
 import { FriendRequestsModule } from './friend_requests/friend_requests.module';
+import { FriendsModule } from './friends/friends.module';
+import { AppLoggerMiddleware } from './logger.service';
+import { PartecipantsModule } from './partecipants/partecipants.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { PrismaService } from './prisma/prisma.service';
+import { TasksModule } from './tasks/tasks.module';
+import { TripsModule } from './trips/trips.module';
 import { UnsplashModule } from './unsplash/unsplash.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -38,4 +39,8 @@ import { UnsplashModule } from './unsplash/unsplash.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+}

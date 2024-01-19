@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { GetUser } from 'src/auth/decorators';
-import { Task, User } from '@prisma/client';
-import { CreateTaskDto, UpdateTaskDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guards';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Task, User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
+import { CreateTaskDto, UpdateTaskDto } from './dto';
+import { TasksService } from './tasks.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)

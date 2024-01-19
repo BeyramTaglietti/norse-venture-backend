@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Task } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UpdateTaskType } from './dto';
 
 @Injectable()
 export class TasksService {
@@ -48,7 +49,7 @@ export class TasksService {
     tripId: number;
     userId: number;
     taskId: number;
-    task: Task;
+    task: UpdateTaskType;
   }): Promise<Task> {
     try {
       return await this.prisma.task.update({
