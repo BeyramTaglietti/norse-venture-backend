@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import * as argon2 from 'argon2';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { JwtPayload } from './strategies/jwt.strategy';
@@ -47,14 +48,30 @@ export class AuthService {
     return username;
   }
 
-  generateJWT(payload: JwtPayload): string {
+  generateJwtToken(
+    payload: JwtPayload,
+    expiration: string,
+    type: 'access' | 'refresh',
+  ) {
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '30d',
+      secret: this.configService.get(
+        type === 'access' ? 'JWT_SECRET' : 'JWT_REFRESH_SECRET',
+      ),
+      expiresIn: expiration,
     });
   }
 
-  async verifyToken(token: string): Promise<TokenPayload> {
+  generateToken(payload: JwtPayload): Token {
+    const access_token = this.generateJwtToken(payload, '7m', 'access');
+    const refresh_token = this.generateJwtToken(payload, '30d', 'refresh');
+
+    return {
+      access_token,
+      refresh_token,
+    };
+  }
+
+  async verifyGoogleToken(token: string): Promise<TokenPayload> {
     try {
       const ticket = await this.client.verifyIdToken({
         idToken: token,
@@ -73,7 +90,7 @@ export class AuthService {
   }
 
   async login(token: string): Promise<Token & { user: User }> {
-    const payload = await this.verifyToken(token);
+    const payload = await this.verifyGoogleToken(token);
 
     const userExists = await this.prismaService.user.findUnique({
       where: {
@@ -84,23 +101,27 @@ export class AuthService {
     if (!userExists) {
       const user = await this.register(payload);
 
-      const generatedToken = this.generateJWT({
-        sub: user.id,
-        email: user.email,
+      const { access_token, refresh_token } = this.generateToken({
+        userId: user.id,
       });
 
+      this.updateRefreshToken(user.id, refresh_token);
+
       return {
-        access_token: generatedToken,
+        access_token,
+        refresh_token,
         user,
       };
     } else {
-      const generatedToken = this.generateJWT({
-        sub: userExists.id,
-        email: userExists.email,
+      const { access_token, refresh_token } = this.generateToken({
+        userId: userExists.id,
       });
 
+      this.updateRefreshToken(userExists.id, refresh_token);
+
       return {
-        access_token: generatedToken,
+        access_token,
+        refresh_token,
         user: userExists,
       };
     }
@@ -128,5 +149,64 @@ export class AuthService {
     } catch (e) {
       throw new InternalServerErrorException();
     }
+  }
+
+  async refreshToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: payload.userId,
+        },
+      });
+
+      if (!user) throw new HttpException('User not found', 404);
+
+      if (!user.refreshToken)
+        throw new HttpException('Invalid refresh token', 401);
+
+      if (await argon2.verify(user.refreshToken, token)) {
+        this.prismaService.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            refreshToken: null,
+          },
+        });
+      } else throw new HttpException('Invalid refresh token', 401);
+
+      const { access_token, refresh_token } = this.generateToken({
+        userId: user.id,
+      });
+
+      const updatedUser = await this.updateRefreshToken(user.id, refresh_token);
+
+      return {
+        access_token,
+        refresh_token,
+        user: updatedUser,
+      };
+    } catch (e) {
+      throw new HttpException('Invalid refresh token', 401);
+    }
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const hashedToken = await argon2.hash(refreshToken);
+
+    const updatedUser = await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        refreshToken: hashedToken,
+      },
+    });
+
+    return updatedUser;
   }
 }

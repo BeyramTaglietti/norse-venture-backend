@@ -65,6 +65,8 @@ model User {
 
   sentFriendRequests     FriendRequest[] @relation("sentFriendRequests")
   receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
+
+  refreshToken String?
 }
 
 model FriendRequest {
