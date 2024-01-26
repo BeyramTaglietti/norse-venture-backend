@@ -8,12 +8,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { User, UserInTrip } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
-import { PartecipantsService } from './partecipants.service';
+import { JwtPayload } from 'src/auth/strategies';
 import { AddPartecipantDto } from './dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { PartecipantsService } from './partecipants.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -24,20 +25,20 @@ export class PartecipantsController {
   @Get()
   getPartecipants(
     @Param('tripId', ParseIntPipe) tripId: number,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<User[]> {
-    return this.partecipantsService.getPartecipants(tripId, user.id);
+    return this.partecipantsService.getPartecipants(tripId, user);
   }
 
   @Post()
   addPartecipant(
     @Param('tripId', ParseIntPipe) tripId: number,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
     @Body() partecipant: AddPartecipantDto,
   ): Promise<User> {
     return this.partecipantsService.addPartecipant(
       tripId,
-      user.id,
+      user,
       partecipant.userId,
     );
   }
@@ -46,7 +47,7 @@ export class PartecipantsController {
   removePartecipant(
     @Param('tripId', ParseIntPipe) tripId: number,
     @Param('partecipantId', ParseIntPipe) partecipantId: number,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<UserInTrip> {
     return this.partecipantsService.removePartecipant(
       tripId,

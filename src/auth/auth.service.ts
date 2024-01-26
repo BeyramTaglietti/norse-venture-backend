@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   generateToken(payload: JwtPayload): Token {
-    const access_token = this.generateJwtToken(payload, '7m', 'access');
+    const access_token = this.generateJwtToken(payload, '10s', 'access');
     const refresh_token = this.generateJwtToken(payload, '30d', 'refresh');
 
     return {
@@ -89,7 +89,16 @@ export class AuthService {
     }
   }
 
-  async login(token: string): Promise<Token & { user: User }> {
+  async login(token: string): Promise<
+    Token & {
+      user: {
+        id: number;
+        email: string;
+        username: string;
+        picture: string;
+      };
+    }
+  > {
     const payload = await this.verifyGoogleToken(token);
 
     const userExists = await this.prismaService.user.findUnique({
@@ -107,10 +116,12 @@ export class AuthService {
 
       this.updateRefreshToken(user.id, refresh_token);
 
+      const { id, email, username, picture } = user;
+
       return {
         access_token,
         refresh_token,
-        user,
+        user: { id, email, username, picture },
       };
     } else {
       const { access_token, refresh_token } = this.generateToken({
@@ -119,10 +130,17 @@ export class AuthService {
 
       this.updateRefreshToken(userExists.id, refresh_token);
 
+      const { id, email, username, picture } = userExists;
+
       return {
         access_token,
         refresh_token,
-        user: userExists,
+        user: {
+          id,
+          email,
+          username,
+          picture,
+        },
       };
     }
   }
@@ -153,6 +171,8 @@ export class AuthService {
 
   async refreshToken(token: string) {
     try {
+      console.log('refresh token', token);
+
       const payload = this.jwtService.verify(token, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });

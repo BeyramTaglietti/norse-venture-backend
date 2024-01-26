@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators';
 import { LoginDto, RefreshDto } from './dto';
 import { JwtAuthGuard } from './guards';
+import { JwtPayload } from './strategies';
 import { Token } from './types';
 
 @Controller('auth')
@@ -14,12 +14,14 @@ export class AuthController {
   @ApiBearerAuth()
   @Get('is_authenticated')
   @UseGuards(JwtAuthGuard)
-  isAuthenticated(@GetUser() user: User): User {
-    return user;
+  isAuthenticated(@GetUser() user: JwtPayload): boolean {
+    return !!user;
   }
 
   @Post('google_login')
-  login(@Body() loginBody: LoginDto): Promise<Token> {
+  async login(@Body() loginBody: LoginDto): Promise<Token> {
+    const res = await this.authService.login(loginBody.google_token);
+    console.log(res);
     return this.authService.login(loginBody.google_token);
   }
 

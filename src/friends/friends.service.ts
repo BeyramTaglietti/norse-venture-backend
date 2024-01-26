@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { JwtPayload } from 'src/auth/strategies';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -12,10 +13,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class FriendsService {
   constructor(private prisma: PrismaService) {}
 
-  async getFriends(user: User) {
+  async getFriends(user: JwtPayload) {
     const foundUser = await this.prisma.user.findUnique({
       where: {
-        id: user.id,
+        id: user.userId,
       },
       include: {
         friends: true,
@@ -28,10 +29,10 @@ export class FriendsService {
     return foundUser.friends;
   }
 
-  async deleteFriend(user: User, friendId: number): Promise<User> {
+  async deleteFriend(user: JwtPayload, friendId: number): Promise<User> {
     const friend = await this.prisma.user
       .findUnique({
-        where: { id: user.id },
+        where: { id: user.userId },
       })
       .friends({ where: { id: friendId } });
 
@@ -45,7 +46,7 @@ export class FriendsService {
       promises.push(
         this.prisma.user
           .update({
-            where: { id: user.id },
+            where: { id: user.userId },
             data: {
               friends: {
                 disconnect: { id: friendId },
@@ -61,7 +62,7 @@ export class FriendsService {
           data: {
             friends: {
               disconnect: {
-                id: user.id,
+                id: user.userId,
               },
             },
           },

@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
-import { FriendRequestsService } from './friend_requests.service';
-import { GetUser } from 'src/auth/decorators';
-import { FriendRequest, User } from '@prisma/client';
-import { AddFriendRequestDto, PatchFriendRequestDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guards';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { FriendRequest, User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
+import { JwtPayload } from 'src/auth/strategies';
+import { AddFriendRequestDto, PatchFriendRequestDto } from './dto';
+import { FriendRequestsService } from './friend_requests.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -13,14 +14,14 @@ export class FriendRequestsController {
   constructor(private friendRequstsService: FriendRequestsService) {}
 
   @Get('received')
-  async getReceivedFriendRequest(@GetUser() user: User): Promise<User[]> {
+  async getReceivedFriendRequest(@GetUser() user: JwtPayload): Promise<User[]> {
     const requests = await this.friendRequstsService.getFriendRequest(user);
 
     return requests.receivedFriendRequests;
   }
 
   @Get('sent')
-  async getSentFriendRequest(@GetUser() user: User): Promise<User[]> {
+  async getSentFriendRequest(@GetUser() user: JwtPayload): Promise<User[]> {
     const requests = await this.friendRequstsService.getFriendRequest(user);
 
     return requests.sentFriendRequests;
@@ -29,7 +30,7 @@ export class FriendRequestsController {
   @Post()
   addFriend(
     @Body() friend: AddFriendRequestDto,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<FriendRequest> {
     return this.friendRequstsService.addFriendRequest(user, friend.friendId);
   }
@@ -37,7 +38,7 @@ export class FriendRequestsController {
   @Patch()
   patchFriendRequest(
     @Body() friendRequest: PatchFriendRequestDto,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ) {
     if (friendRequest.accept)
       return this.friendRequstsService.acceptFriendRequest(

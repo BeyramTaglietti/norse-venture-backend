@@ -11,6 +11,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { JwtPayload } from 'src/auth/strategies';
 import { ChangeUsernameDto } from './dto/user-dto';
 import { UsernameValidationPipe } from './pipes';
 import { UserService } from './user.service';
@@ -22,24 +23,24 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get('me')
-  async getCurrentUserInfo(@GetUser() user: User) {
+  async getCurrentUserInfo(@GetUser() user: JwtPayload) {
     return user;
   }
 
   @Get()
   getUsersByUsername(
     @Query('username', UsernameValidationPipe) username: string,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ) {
-    return this.userService.getUsersByUsername(username, user.id);
+    return this.userService.getUsersByUsername(username, user);
   }
 
   @Patch()
   setUsername(
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
     @Body() body: ChangeUsernameDto,
   ): Promise<User> {
-    return this.userService.setUsername(user.id, body.username);
+    return this.userService.setUsername(user, body.username);
   }
 
   @Get('username_available')
@@ -50,7 +51,7 @@ export class UserController {
   }
 
   @Delete('delete_account')
-  deleteAccount(@GetUser() user: User) {
+  deleteAccount(@GetUser() user: JwtPayload) {
     return this.userService.deleteAccount(user);
   }
 }

@@ -6,19 +6,20 @@ import {
 } from '@nestjs/common';
 import { FriendRequest, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JwtPayload } from 'src/auth/strategies';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class FriendRequestsService {
   constructor(private prisma: PrismaService) {}
 
-  async getFriendRequest(user: User): Promise<{
+  async getFriendRequest(user: JwtPayload): Promise<{
     sentFriendRequests: User[];
     receivedFriendRequests: User[];
   }> {
     const friendRequests = await this.prisma.user.findUnique({
       where: {
-        id: user.id,
+        id: user.userId,
       },
       include: {
         receivedFriendRequests: {
@@ -47,13 +48,16 @@ export class FriendRequestsService {
     };
   }
 
-  async addFriendRequest(user: User, friendId: number): Promise<FriendRequest> {
+  async addFriendRequest(
+    user: JwtPayload,
+    friendId: number,
+  ): Promise<FriendRequest> {
     const friend = await this.prisma.user.findUnique({
       where: { id: friendId },
       include: { friends: true },
     });
 
-    if (friendId === user.id)
+    if (friendId === user.userId)
       throw new HttpException(
         'User cannot add himself',
         HttpStatus.BAD_REQUEST,
@@ -62,7 +66,7 @@ export class FriendRequestsService {
     if (!friend)
       throw new HttpException('Friend not found', HttpStatus.NOT_FOUND);
 
-    if (friend.friends.find((x) => x.id === user.id))
+    if (friend.friends.find((x) => x.id === user.userId))
       throw new HttpException(
         'User is already a friend',
         HttpStatus.BAD_REQUEST,
@@ -72,7 +76,7 @@ export class FriendRequestsService {
       return await this.prisma.friendRequest.create({
         data: {
           receiverId: friendId,
-          senderId: user.id,
+          senderId: user.userId,
         },
       });
     } catch (e) {
@@ -89,9 +93,9 @@ export class FriendRequestsService {
     }
   }
 
-  async acceptFriendRequest(user: User, friendId: number): Promise<User> {
+  async acceptFriendRequest(user: JwtPayload, friendId: number): Promise<User> {
     const request = await this.prisma.friendRequest.findUnique({
-      where: { senderId: friendId, receiverId: user.id },
+      where: { senderId: friendId, receiverId: user.userId },
     });
 
     if (!request)
@@ -111,7 +115,7 @@ export class FriendRequestsService {
         this.prisma.friendRequest
           .delete({
             where: {
-              senderId: user.id,
+              senderId: user.userId,
               receiverId: friendId,
             },
           })
@@ -120,7 +124,7 @@ export class FriendRequestsService {
 
       promises.push(
         this.prisma.user.update({
-          where: { id: user.id },
+          where: { id: user.userId },
           data: { friends: { connect: [{ id: friendId }] } },
         }),
       );
@@ -131,7 +135,7 @@ export class FriendRequestsService {
         this.prisma.user
           .update({
             where: { id: friendId },
-            data: { friends: { connect: [{ id: user.id }] } },
+            data: { friends: { connect: [{ id: user.userId }] } },
           })
           .then((resp) => (friend = resp)),
       );
@@ -145,11 +149,11 @@ export class FriendRequestsService {
   }
 
   async denyFriendRequest(
-    user: User,
+    user: JwtPayload,
     friendId: number,
   ): Promise<FriendRequest> {
     const request = await this.prisma.friendRequest.findUnique({
-      where: { senderId: friendId, receiverId: user.id },
+      where: { senderId: friendId, receiverId: user.userId },
     });
 
     if (!request)

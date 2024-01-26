@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Task } from '@prisma/client';
+import { JwtPayload } from 'src/auth/strategies';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateTaskType } from './dto';
 
@@ -7,12 +8,12 @@ import { UpdateTaskType } from './dto';
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  async getTasks(tripId: number, userId: number): Promise<Task[]> {
+  async getTasks(tripId: number, user: JwtPayload): Promise<Task[]> {
     const trip = await this.prisma.trip.findUnique({
       select: {
         tasks: true,
       },
-      where: { id: tripId, ownerId: userId },
+      where: { id: tripId, ownerId: user.userId },
     });
 
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
@@ -20,13 +21,17 @@ export class TasksService {
     return trip.tasks;
   }
 
-  async createTask(task: Task, tripId: number, userId: number): Promise<Task> {
+  async createTask(
+    task: Task,
+    tripId: number,
+    user: JwtPayload,
+  ): Promise<Task> {
     const trip = await this.prisma.trip.findUnique({
       select: {
         id: true,
       },
       where: {
-        ownerId: userId,
+        ownerId: user.userId,
         id: tripId,
       },
     });
@@ -47,7 +52,7 @@ export class TasksService {
     task,
   }: {
     tripId: number;
-    userId: number;
+    userId: JwtPayload;
     taskId: number;
     task: UpdateTaskType;
   }): Promise<Task> {
@@ -58,7 +63,7 @@ export class TasksService {
           id: taskId,
           trip: {
             id: tripId,
-            ownerId: userId,
+            ownerId: userId.userId,
           },
         },
       });
@@ -70,11 +75,11 @@ export class TasksService {
   async deleteTask({
     taskId,
     tripId,
-    userId,
+    user,
   }: {
     taskId: number;
     tripId: number;
-    userId: number;
+    user: JwtPayload;
   }): Promise<Task> {
     try {
       const task = await this.prisma.task.delete({
@@ -82,7 +87,7 @@ export class TasksService {
           id: taskId,
           trip: {
             id: tripId,
-            ownerId: userId,
+            ownerId: user.userId,
           },
         },
       });

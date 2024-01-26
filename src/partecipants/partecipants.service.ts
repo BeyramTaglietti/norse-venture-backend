@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { User, UserInTrip } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JwtPayload } from 'src/auth/strategies';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PartecipantsService {
   constructor(private prisma: PrismaService) {}
 
-  async getPartecipants(tripId: number, userId: number): Promise<User[]> {
+  async getPartecipants(tripId: number, user: JwtPayload): Promise<User[]> {
     const trip = await this.prisma.trip
       .findUnique({
         where: {
@@ -27,25 +28,25 @@ export class PartecipantsService {
 
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
-    if (trip.find((x) => x.userId === userId)) {
+    if (trip.find((x) => x.userId === user.userId)) {
       return trip.map((x) => x.user);
     } else throw new HttpException('Unauthorized', HttpStatus.FORBIDDEN);
   }
 
   async addPartecipant(
     tripId: number,
-    userId: number,
+    authenticatedUser: JwtPayload,
     partecipantId: number,
   ): Promise<User> {
     const trip = await this.prisma.trip.findUnique({
-      where: { id: tripId, ownerId: userId },
+      where: { id: tripId, ownerId: authenticatedUser.userId },
     });
 
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
 
     const user = await this.prisma.user.findUnique({
       where: {
-        id: userId,
+        id: authenticatedUser.userId,
       },
       select: {
         friends: true,
@@ -87,7 +88,7 @@ export class PartecipantsService {
   async removePartecipant(
     tripId: number,
     partecipantId: number,
-    user: User,
+    user: JwtPayload,
   ): Promise<UserInTrip> {
     const trip = await this.prisma.trip.findUnique({
       select: {
@@ -105,7 +106,7 @@ export class PartecipantsService {
 
     // owner or non-owner is deleting owner
     if (ownerId === partecipantId) {
-      if (ownerId === user.id)
+      if (ownerId === user.userId)
         throw new HttpException(
           'Cannot remove owner, delete trip instead',
           HttpStatus.FORBIDDEN,
@@ -114,7 +115,7 @@ export class PartecipantsService {
     }
 
     // non-owner is deleting someone
-    if (partecipantId !== user.id && user.id !== ownerId)
+    if (partecipantId !== user.userId && user.userId !== ownerId)
       throw new HttpException('Not authorized', HttpStatus.FORBIDDEN);
 
     // partecipant does not exist

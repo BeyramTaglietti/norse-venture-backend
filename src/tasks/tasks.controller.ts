@@ -10,9 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Task, User } from '@prisma/client';
+import { Task } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { JwtPayload } from 'src/auth/strategies';
 import { CreateTaskDto, UpdateTaskDto } from './dto';
 import { TasksService } from './tasks.service';
 
@@ -25,18 +26,18 @@ export class TasksController {
   @Get('')
   getTasks(
     @Param('tripId', ParseIntPipe) tripId: number,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<Task[]> {
-    return this.taskService.getTasks(tripId, user.id);
+    return this.taskService.getTasks(tripId, user);
   }
 
   @Post('')
   createTask(
     @Param('tripId', ParseIntPipe) tripId: number,
     @Body() task: CreateTaskDto,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<Task> {
-    return this.taskService.createTask(task as Task, tripId, user.id);
+    return this.taskService.createTask(task as Task, tripId, user);
   }
 
   @Patch(':taskId')
@@ -44,11 +45,11 @@ export class TasksController {
     @Param('tripId', ParseIntPipe) tripId: number,
     @Param('taskId', ParseIntPipe) taskId: number,
     @Body() task: UpdateTaskDto,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<Task> {
     return this.taskService.patchTask({
       tripId,
-      userId: user.id,
+      userId: user,
       taskId,
       task: task as Task,
     });
@@ -58,8 +59,8 @@ export class TasksController {
   deleteTask(
     @Param('tripId', ParseIntPipe) tripId: number,
     @Param('taskId', ParseIntPipe) taskId: number,
-    @GetUser() user: User,
+    @GetUser() user: JwtPayload,
   ): Promise<Task> {
-    return this.taskService.deleteTask({ taskId, tripId, userId: user.id });
+    return this.taskService.deleteTask({ taskId, tripId, user: user });
   }
 }

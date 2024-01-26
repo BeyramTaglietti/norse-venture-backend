@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Trip } from '@prisma/client';
+import { JwtPayload } from 'src/auth/strategies';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTripType } from './dto';
 
@@ -12,10 +13,10 @@ import { CreateTripType } from './dto';
 export class TripsService {
   constructor(private prisma: PrismaService) {}
 
-  async getTrips(userId: number): Promise<Trip[]> {
+  async getTrips(user: JwtPayload): Promise<Trip[]> {
     const trips = await this.prisma.userInTrip.findMany({
       where: {
-        userId,
+        userId: user.userId,
       },
       include: {
         trip: {
@@ -29,11 +30,11 @@ export class TripsService {
     return trips.map((x) => x.trip);
   }
 
-  async getTrip(userId: number, tripId: number): Promise<Trip> {
+  async getTrip(user: JwtPayload, tripId: number): Promise<Trip> {
     const data = await this.prisma.userInTrip.findFirst({
       where: {
         tripId,
-        userId,
+        userId: user.userId,
       },
       include: {
         trip: true,
@@ -45,8 +46,8 @@ export class TripsService {
     return data.trip;
   }
 
-  async createTrip(trip: Trip, userId: number): Promise<Trip> {
-    trip.ownerId = userId;
+  async createTrip(trip: Trip, user: JwtPayload): Promise<Trip> {
+    trip.ownerId = user.userId;
 
     try {
       return await this.prisma.trip.create({
@@ -54,7 +55,7 @@ export class TripsService {
           ...trip,
           partecipants: {
             create: {
-              userId: userId,
+              userId: user.userId,
             },
           },
         },
@@ -67,12 +68,12 @@ export class TripsService {
     }
   }
 
-  async deleteTrip(tripId: number, userId: number): Promise<Trip> {
+  async deleteTrip(tripId: number, user: JwtPayload): Promise<Trip> {
     try {
       const trip = await this.prisma.trip.delete({
         where: {
           id: tripId,
-          ownerId: userId,
+          ownerId: user.userId,
         },
       });
 
@@ -84,13 +85,13 @@ export class TripsService {
 
   async editTrip(
     trip: CreateTripType,
-    userId: number,
+    user: JwtPayload,
     tripId: number,
   ): Promise<Trip> {
     const tripFound = await this.prisma.trip.findUnique({
       where: {
         id: tripId,
-        ownerId: userId,
+        ownerId: user.userId,
       },
     });
 
