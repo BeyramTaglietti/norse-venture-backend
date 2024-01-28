@@ -49,7 +49,7 @@ export class TasksController {
   ): Promise<Task> {
     return this.taskService.patchTask({
       tripId,
-      userId: user,
+      user: user,
       taskId,
       task: task as Task,
     });

@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   generateToken(payload: JwtPayload): Token {
-    const access_token = this.generateJwtToken(payload, '10s', 'access');
+    const access_token = this.generateJwtToken(payload, '15m', 'access');
     const refresh_token = this.generateJwtToken(payload, '30d', 'refresh');
 
     return {

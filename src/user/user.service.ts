@@ -14,7 +14,8 @@ export class UserService {
     const users = await this.prisma.user.findMany({
       where: {
         username: {
-          contains: username,
+          contains: username.toLowerCase(),
+          mode: 'insensitive',
         },
       },
     });

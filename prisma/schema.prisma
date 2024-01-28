@@ -75,8 +75,10 @@ model FriendRequest {
   updatedAt DateTime @updatedAt
 
   sender   User @relation(name: "sentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId Int  @unique
+  senderId Int
 
   receiver   User @relation(name: "receivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
-  receiverId Int  @unique
+  receiverId Int
+
+  @@unique([senderId, receiverId])
 }

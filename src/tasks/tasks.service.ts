@@ -9,11 +9,14 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   async getTasks(tripId: number, user: JwtPayload): Promise<Task[]> {
+    console.log('user', user.userId);
+    console.log('trip', tripId);
+
     const trip = await this.prisma.trip.findUnique({
       select: {
         tasks: true,
       },
-      where: { id: tripId, ownerId: user.userId },
+      where: { id: tripId, partecipants: { some: { userId: user.userId } } },
     });
 
     if (!trip) throw new HttpException('Trip not found', HttpStatus.NOT_FOUND);
@@ -31,8 +34,8 @@ export class TasksService {
         id: true,
       },
       where: {
-        ownerId: user.userId,
         id: tripId,
+        partecipants: { some: { userId: user.userId } },
       },
     });
 
@@ -47,12 +50,12 @@ export class TasksService {
 
   async patchTask({
     tripId,
-    userId,
+    user,
     taskId,
     task,
   }: {
     tripId: number;
-    userId: JwtPayload;
+    user: JwtPayload;
     taskId: number;
     task: UpdateTaskType;
   }): Promise<Task> {
@@ -63,7 +66,7 @@ export class TasksService {
           id: taskId,
           trip: {
             id: tripId,
-            ownerId: userId.userId,
+            partecipants: { some: { userId: user.userId } },
           },
         },
       });
@@ -87,7 +90,7 @@ export class TasksService {
           id: taskId,
           trip: {
             id: tripId,
-            ownerId: user.userId,
+            partecipants: { some: { userId: user.userId } },
           },
         },
       });
