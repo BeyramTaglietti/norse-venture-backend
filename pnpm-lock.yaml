@@ -27,7 +27,7 @@ dependencies:
     specifier: ^7.1.14
     version: 7.1.14(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)(reflect-metadata@0.1.13)
   '@prisma/client':
-    specifier: ^5.8.1
+    specifier: 5.8.1
     version: 5.8.1(prisma@5.8.1)
   argon2:
     specifier: ^0.31.2
@@ -113,7 +113,7 @@ devDependencies:
     specifier: ^3.0.0
     version: 3.0.3
   prisma:
-    specifier: ^5.8.1
+    specifier: 5.8.1
     version: 5.8.1
   source-map-support:
     specifier: ^0.5.21
