@@ -9,6 +9,6 @@ jobs:
       - uses: actions/checkout@v2
       - run: npm install
       - name: Run production migration
-        run: npm run migrate:deploy
+        run: npm run migrate:postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
