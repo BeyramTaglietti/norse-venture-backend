@@ -6,14 +6,14 @@ COPY package*.json ./
 
 COPY prisma ./prisma/
 
-RUN npm install
+RUN npx pnpm i
 
 COPY . .
 
-RUN npm run build
+RUN npx pnpm build
 
 ENV PORT "8080"
 
 EXPOSE ${PORT}
 
-CMD [ "npm", "run", "start:prod"]
+CMD [ "npx", "pnpm", "start:prod"]
