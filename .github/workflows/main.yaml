@@ -7,8 +7,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' # Only deploy master
     steps:
       - uses: actions/checkout@v2
-      - run: npm install
+      - run: npx pnpm install
       - name: Run production migration
-        run: npm run migrate:postgres
+        run: npx pnpm migrate:postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
