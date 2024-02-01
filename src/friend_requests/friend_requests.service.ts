@@ -73,8 +73,6 @@ export class FriendRequestsService {
       );
 
     try {
-      console.log('receiver', friendId);
-      console.log('sender', user.userId);
       return await this.prisma.friendRequest.create({
         data: {
           receiverId: friendId,
@@ -82,7 +80,6 @@ export class FriendRequestsService {
         },
       });
     } catch (e) {
-      console.log(e);
       if (e instanceof PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
           throw new HttpException(

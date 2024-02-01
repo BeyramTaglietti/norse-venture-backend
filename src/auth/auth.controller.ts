@@ -20,8 +20,6 @@ export class AuthController {
 
   @Post('google_login')
   async login(@Body() loginBody: LoginDto): Promise<Token> {
-    const res = await this.authService.login(loginBody.google_token);
-    console.log(res);
     return this.authService.login(loginBody.google_token);
   }
 

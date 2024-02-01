@@ -9,9 +9,6 @@ export class TasksService {
   constructor(private prisma: PrismaService) {}
 
   async getTasks(tripId: number, user: JwtPayload): Promise<Task[]> {
-    console.log('user', user.userId);
-    console.log('trip', tripId);
-
     const trip = await this.prisma.trip.findUnique({
       select: {
         tasks: true,
