@@ -12,8 +12,4 @@ COPY . .
 
 RUN npx pnpm build
 
-ENV PORT "8080"
-
-EXPOSE ${PORT}
-
 CMD [ "npx", "pnpm", "start:prod"]

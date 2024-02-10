@@ -1,10 +1,12 @@
 name: norse-venture-backend
-on: push
+on:
+  push:
+    branches: [master]
 
 jobs:
-  deploy:
+  migration:
+    name: prisma migration to master branch postgres DB
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' # Only deploy master
     steps:
       - uses: actions/checkout@v2
       - run: npx pnpm install

@@ -34,6 +34,7 @@ model Task {
   value       Boolean   @default(false)
   description String?
   date        DateTime?
+  price       Int?
 
   trip   Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
   tripId Int
