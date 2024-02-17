@@ -9,10 +9,14 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - run: npx pnpm install
+      - name: Install pnpm
+        run: npm i -g pnpm
+      - run: pnpm install
       - name: Copy env file
         run: |
           touch .env
           echo "${{ secrets.ENV_FILE }}" >> .env
       - name: Run production migration
         run: npx pnpm migrate:postgres
+      - name: Build
+        run: pnpx prisma generate && pnpm run build
