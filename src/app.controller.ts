@@ -9,4 +9,9 @@ export class AppController {
   ping() {
     return this.appService.ping();
   }
+
+  @Get('')
+  getNorseVenture() {
+    return 'Norse Venture';
+  }
 }
