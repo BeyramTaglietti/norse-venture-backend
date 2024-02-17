@@ -12,17 +12,17 @@ jobs:
       - name: Install pnpm globally
         run: sudo npm i -g pnpm
       - run: pnpm install
-      
+
       - name: Copy env file
         run: |
           touch .env
           echo "${{ secrets.ENV_FILE }}" >> .env
-          
+
       - name: Run production migration
         run: pnpm migrate:postgres
-        
+
       - name: Prisma generate && application build
         run: pnpx prisma generate && pnpm build
-        
+
       - name: Restart node application process
         run: pm2 restart NorseVentureAPI
