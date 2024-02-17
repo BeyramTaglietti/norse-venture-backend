@@ -6,11 +6,11 @@ on:
 jobs:
   migration:
     name: prisma migration to master branch postgres DB
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - run: npx pnpm install
+      - run: pnpm install
       - name: Run production migration
-        run: npx pnpm migrate:postgres
+        run: pnpm migrate:postgres
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
