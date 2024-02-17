@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install pnpm
-        run: npm i -g pnpm
+        run: sudo npm i -g pnpm
       - run: pnpm install
       - name: Copy env file
         run: |
