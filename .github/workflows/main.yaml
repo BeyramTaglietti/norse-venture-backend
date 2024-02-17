@@ -10,7 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: npx pnpm install
+      - name: Copy env file
+        run: |
+          touch .env
+          echo ${{ secrets.ENV_FILE }} >> .env
       - name: Run production migration
         run: npx pnpm migrate:postgres
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
