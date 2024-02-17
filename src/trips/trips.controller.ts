@@ -7,10 +7,13 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TripsService } from './trips.service';
 
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Trip } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
@@ -56,6 +59,16 @@ export class TripsController {
     @GetUser() user: JwtPayload,
     @Body() trip: CreateTripDto,
   ) {
-    return this.tripService.editTrip(trip as Trip, user, tripId);
+    return this.tripService.editTrip(trip, user, tripId);
+  }
+
+  @Post(':tripId/thumbnail')
+  @UseInterceptors(FileInterceptor('thumbnail'))
+  uploadThumbnail(
+    @Param('tripId', ParseIntPipe) tripId: number,
+    @GetUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.tripService.uploadThumbnail(tripId, user, file);
   }
 }
