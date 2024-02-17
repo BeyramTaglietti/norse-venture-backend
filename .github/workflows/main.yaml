@@ -13,6 +13,6 @@ jobs:
       - name: Copy env file
         run: |
           touch .env
-          echo ${{ secrets.ENV_FILE }} >> .env
+          echo "${{ secrets.ENV_FILE }}" >> .env
       - name: Run production migration
         run: npx pnpm migrate:postgres
