@@ -275,7 +275,6 @@ export class TripsService {
       });
 
       const size = await compressedImage.metadata().then((x) => x.size);
-      console.log('size', size);
 
       if (!size) {
         throw new InternalServerErrorException('Failed to resize image');
