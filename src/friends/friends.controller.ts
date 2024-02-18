@@ -17,7 +17,7 @@ import { JwtPayload } from 'src/auth/strategies';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('friends')
+@Controller('v1/friends')
 export class FriendsController {
   constructor(private friendsService: FriendsService) {}
 

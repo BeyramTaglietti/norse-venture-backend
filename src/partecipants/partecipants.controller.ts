@@ -18,7 +18,7 @@ import { PartecipantsService } from './partecipants.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('trips/:tripId/partecipants')
+@Controller('v1/trips/:tripId/partecipants')
 export class PartecipantsController {
   constructor(private partecipantsService: PartecipantsService) {}
 

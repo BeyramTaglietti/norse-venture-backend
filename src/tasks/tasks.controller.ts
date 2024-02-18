@@ -19,7 +19,7 @@ import { TasksService } from './tasks.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('trips/:tripId/tasks')
+@Controller('v1/trips/:tripId/tasks')
 export class TasksController {
   constructor(private readonly taskService: TasksService) {}
 

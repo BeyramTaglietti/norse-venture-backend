@@ -7,7 +7,7 @@ import { JwtAuthGuard } from './guards';
 import { JwtPayload } from './strategies';
 import { Token } from './types';
 
-@Controller('auth')
+@Controller('v1/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

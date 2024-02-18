@@ -9,7 +9,7 @@ import { FriendRequestsService } from './friend_requests.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('friend_requests')
+@Controller('v1/friend_requests')
 export class FriendRequestsController {
   constructor(private friendRequstsService: FriendRequestsService) {}
 

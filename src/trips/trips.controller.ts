@@ -23,7 +23,7 @@ import { CreateTripDto } from './dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('trips')
+@Controller('v1/trips')
 export class TripsController {
   constructor(private tripService: TripsService) {}
 
