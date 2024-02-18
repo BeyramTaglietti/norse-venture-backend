@@ -281,7 +281,6 @@ export class TripsService {
       }
 
       compressedSize = size;
-
       qualityValue -= 10;
     }
 
