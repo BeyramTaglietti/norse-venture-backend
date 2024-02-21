@@ -29,5 +29,5 @@ jobs:
       - name: Start backend container and run migration
         run: |
           cd /home/ubuntu/norse_venture
-          docker-compose up -d backend
-          docker-compose exec backend pnpm migrate:prod
+          docker compose up -d backend
+          docker compose exec backend pnpm migrate:prod
