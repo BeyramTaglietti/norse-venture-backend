@@ -21,7 +21,7 @@ jobs:
   migration_and_composeup:
     name: prisma migration and compose up the backend container
     runs-on: self-hosted
-    needs: docker
+    needs: docker_build_push
     steps:
       - uses: actions/checkout@v2
       - name: pull docker image
