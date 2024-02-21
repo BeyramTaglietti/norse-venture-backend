@@ -6,10 +6,12 @@ COPY package*.json ./
 
 COPY prisma ./prisma/
 
-RUN npx pnpm i
+RUN npm i -g pnpm
+
+RUN pnpm i
 
 COPY . .
 
-RUN npx pnpm build
+RUN pnpm build
 
-CMD [ "npx", "pnpm", "start:prod"]
+CMD ["pnpm", "start:prod"]
