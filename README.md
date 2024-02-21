@@ -18,3 +18,24 @@
 ## prod env migration
 
   prisma migrate deploy
+
+
+# ENV FILE
+
+  DATABASE_URL=""
+
+  WEB_CLIENT_ID = ""
+  IOS_CLIENT_ID = ""
+  ANDROID_CLIENT_ID = ""
+
+  JWT_SECRET = ""
+  JWT_REFRESH_SECRET = ""
+
+  UNSPLASH_ACCESS_KEY=""
+
+  PORT=8099
+
+  BUCKET_NAME=""
+  BUCKET_REGION=""
+  BUCKET_ACCESS_KEY=""
+  BUCKET_SECRET_KEY=""
