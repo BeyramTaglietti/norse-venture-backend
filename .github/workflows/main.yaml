@@ -4,25 +4,29 @@ on:
     branches: [master]
 
 jobs:
+  docker:
+    name: docker build and push to dockerhub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: docker build -t norse-venture-backend .
+      - name: Push the Docker image
+        run: docker tag norse-venture-backend ${{ secrets.DOCKERHUB_USERNAME }}/norseventure
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin <<< "${{ secrets.DOCKERHUB_PASSWORD }}"
+      - name: Push to DockerHub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/norseventure
+
   migration:
-    name: prisma migration to master branch postgres DB
+    name: prisma migration and compose up the backend container
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - name: Install pnpm globally
-        run: sudo npm i -g pnpm
-      - run: pnpm install
-
-      - name: Copy env file
+      - name: pull docker image
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/norseventure
+      - name: Start backend container and run migration
         run: |
-          touch .env
-          echo "${{ secrets.ENV_FILE }}" >> .env
-
-      - name: Run production migration
-        run: pnpm migrate:prod
-
-      - name: Prisma generate && application build
-        run: pnpx prisma generate && pnpm build
-
-      - name: Restart node application process
-        run: pm2 restart NorseVentureAPI
+          cd /home/ubuntu/norse_venture
+          docker-compose up -d backend
+          docker-compose exec backend pnpm migrate:prod
