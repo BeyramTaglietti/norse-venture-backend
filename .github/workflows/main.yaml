@@ -4,7 +4,7 @@ on:
     branches: [master]
 
 jobs:
-  docker:
+  docker_build_push:
     name: docker build and push to dockerhub
     runs-on: ubuntu-latest
     steps:
@@ -12,15 +12,16 @@ jobs:
       - name: Build the Docker image
         run: docker build -t norse-venture-backend .
       - name: Push the Docker image
-        run: docker tag norse-venture-backend ${{ secrets.DOCKERHUB_USERNAME }}/norseventure
+        run: docker tag norse-venture-backend ${{ secrets.DOCKERHUB_USERNAME }}/norseventure:latest
       - name: Login to DockerHub
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin <<< "${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: Push to DockerHub
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/norseventure
 
-  migration:
+  migration_and_composeup:
     name: prisma migration and compose up the backend container
     runs-on: self-hosted
+    needs: docker
     steps:
       - uses: actions/checkout@v2
       - name: pull docker image
