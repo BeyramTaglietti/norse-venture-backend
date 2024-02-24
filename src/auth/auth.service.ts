@@ -61,7 +61,7 @@ export class AuthService {
     });
   }
 
-  generateToken(payload: JwtPayload): Token {
+  generateTokens(payload: JwtPayload): Token {
     const access_token = this.generateJwtToken(payload, '15m', 'access');
     const refresh_token = this.generateJwtToken(payload, '30d', 'refresh');
 
@@ -110,7 +110,7 @@ export class AuthService {
     if (!userExists) {
       const user = await this.register(payload);
 
-      const { access_token, refresh_token } = this.generateToken({
+      const { access_token, refresh_token } = this.generateTokens({
         userId: user.id,
       });
 
@@ -124,7 +124,7 @@ export class AuthService {
         user: { id, email, username, picture },
       };
     } else {
-      const { access_token, refresh_token } = this.generateToken({
+      const { access_token, refresh_token } = this.generateTokens({
         userId: userExists.id,
       });
 
@@ -187,27 +187,21 @@ export class AuthService {
         throw new HttpException('Invalid refresh token', 401);
 
       if (await argon2.verify(user.refreshToken, token)) {
-        this.prismaService.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            refreshToken: null,
-          },
+        const { access_token, refresh_token } = this.generateTokens({
+          userId: user.id,
         });
+
+        const updatedUser = await this.updateRefreshToken(
+          user.id,
+          refresh_token,
+        );
+
+        return {
+          access_token,
+          refresh_token,
+          user: updatedUser,
+        };
       } else throw new HttpException('Invalid refresh token', 401);
-
-      const { access_token, refresh_token } = this.generateToken({
-        userId: user.id,
-      });
-
-      const updatedUser = await this.updateRefreshToken(user.id, refresh_token);
-
-      return {
-        access_token,
-        refresh_token,
-        user: updatedUser,
-      };
     } catch (e) {
       throw new HttpException('Invalid refresh token', 401);
     }
