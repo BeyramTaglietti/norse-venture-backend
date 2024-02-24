@@ -180,7 +180,7 @@ export class TripsService {
 
     const bucketParams = {
       Bucket: this.config.get('BUCKET_NAME'),
-      Key: `trip-${tripId}-thumbnail`,
+      Key: `trip_thumbnails/trip-${tripId}-thumbnail`,
       Body: resizedBuffer,
       ContentType: await resizedImage.metadata().then((x) => x.format),
     };
@@ -215,7 +215,7 @@ export class TripsService {
   async getTripThumbnail(tripId: number): Promise<string> {
     const bucketParams = {
       Bucket: this.config.get('BUCKET_NAME'),
-      Key: `trip-${tripId}-thumbnail`,
+      Key: `trip_thumbnails/trip-${tripId}-thumbnail`,
     };
 
     const command = new GetObjectCommand(bucketParams);

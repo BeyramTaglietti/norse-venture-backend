@@ -31,6 +31,7 @@
   WEB_CLIENT_ID = ""
   IOS_CLIENT_ID = ""
   ANDROID_CLIENT_ID = ""
+  APPLE_CLIENT_ID = ""    
 
   JWT_SECRET = ""
   JWT_REFRESH_SECRET = ""
