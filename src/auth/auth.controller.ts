@@ -19,8 +19,13 @@ export class AuthController {
   }
 
   @Post('google_login')
-  async login(@Body() loginBody: LoginDto): Promise<Token> {
-    return this.authService.login(loginBody.google_token);
+  async googleLogin(@Body() loginBody: LoginDto): Promise<Token> {
+    return this.authService.googleLogin(loginBody.token);
+  }
+
+  @Post('apple_login')
+  async appleLogin(@Body() loginBody: LoginDto): Promise<Token> {
+    return this.authService.appleLogin(loginBody.token);
   }
 
   @Post('refresh_token')

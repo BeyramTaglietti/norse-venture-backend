@@ -10,6 +10,7 @@ import { User } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { PrismaService } from 'src/prisma/prisma.service';
+import verifyAppleToken from 'verify-apple-id-token';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import { Token } from './types';
 
@@ -89,7 +90,7 @@ export class AuthService {
     }
   }
 
-  async login(token: string): Promise<
+  async googleLogin(token: string): Promise<
     Token & {
       user: {
         id: number;
@@ -101,14 +102,43 @@ export class AuthService {
   > {
     const payload = await this.verifyGoogleToken(token);
 
+    return await this.login(payload.email!, payload.picture);
+  }
+
+  async appleLogin(token: string): Promise<
+    Token & {
+      user: {
+        id: number;
+        email: string;
+        username: string;
+        picture: string;
+      };
+    }
+  > {
+    const payload = await verifyAppleToken({
+      idToken: token,
+      clientId: this.configService.get('APPLE_CLIENT_ID')!,
+    });
+
+    return await this.login(payload.email);
+  }
+
+  async login(
+    userEmail: string,
+    userPicture?: string,
+  ): Promise<
+    Token & {
+      user: { id: number; email: string; username: string; picture: string };
+    }
+  > {
     const userExists = await this.prismaService.user.findUnique({
       where: {
-        email: payload.email,
+        email: userEmail,
       },
     });
 
     if (!userExists) {
-      const user = await this.register(payload);
+      const user = await this.register(userEmail, userPicture);
 
       const { access_token, refresh_token } = this.generateTokens({
         userId: user.id,
@@ -145,8 +175,8 @@ export class AuthService {
     }
   }
 
-  async register(payload: TokenPayload): Promise<User> {
-    if (!payload.email)
+  async register(email: string, picture?: string): Promise<User> {
+    if (!email)
       throw new HttpException(
         'Please provide an email address',
         HttpStatus.BAD_REQUEST,
@@ -157,8 +187,8 @@ export class AuthService {
 
       const newUser = await this.prismaService.user.create({
         data: {
-          email: payload.email,
-          picture: payload.picture ?? '',
+          email,
+          picture: picture ?? '',
           username: generatedUsername,
         },
       });
