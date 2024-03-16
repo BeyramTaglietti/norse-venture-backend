@@ -1,10 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
-
-export enum ImageProvider {
-  UNSPLASH = 'unsplash',
-  S3 = 's3',
-}
+import { ImageProvider } from 'src/shared';
 
 export const CreateTripSchema = z.object({
   title: z.string().min(3),

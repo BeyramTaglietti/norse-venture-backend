@@ -58,7 +58,6 @@ model User {
 
   email    String       @unique
   username String       @unique
-  picture  String
   Trip     Trip[]
   trips    UserInTrip[]
 
@@ -69,6 +68,8 @@ model User {
   receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
 
   refreshToken String?
+
+  profilePicture String?
 }
 
 model FriendRequest {

@@ -6,6 +6,7 @@ import { LoginDto, RefreshDto } from './dto';
 import { JwtAuthGuard } from './guards';
 import { JwtPayload } from './strategies';
 import { Token } from './types';
+import { LoginResponse } from './types/login.type';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -19,12 +20,12 @@ export class AuthController {
   }
 
   @Post('google_login')
-  async googleLogin(@Body() loginBody: LoginDto): Promise<Token> {
+  async googleLogin(@Body() loginBody: LoginDto): Promise<LoginResponse> {
     return this.authService.googleLogin(loginBody.token);
   }
 
   @Post('apple_login')
-  async appleLogin(@Body() loginBody: LoginDto): Promise<Token> {
+  async appleLogin(@Body() loginBody: LoginDto): Promise<LoginResponse> {
     return this.authService.appleLogin(loginBody.token);
   }
 

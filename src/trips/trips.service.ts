@@ -1,9 +1,4 @@
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   HttpException,
   HttpStatus,
@@ -12,12 +7,16 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Trip } from '@prisma/client';
-import * as sharp from 'sharp';
 import { JwtPayload } from 'src/auth/strategies';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateTripType, ImageProvider } from './dto';
+import { CreateTripType } from './dto';
 
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  ImageProvider,
+  getSignedImageUrl,
+  resizeThumbnail,
+  uploadToS3,
+} from 'src/shared';
 
 @Injectable()
 export class TripsService {
@@ -92,14 +91,12 @@ export class TripsService {
   async createTrip(trip: Trip, user: JwtPayload): Promise<Trip> {
     trip.ownerId = user.userId;
 
-    const background = trip.background;
-
     try {
       return await this.prisma.trip.create({
         data: {
           ...trip,
-          background: background || null,
-          backgroundProvider: background ? 'unsplash' : null,
+          background: trip.background,
+          backgroundProvider: trip.backgroundProvider,
           partecipants: {
             create: {
               userId: user.userId,
@@ -149,7 +146,7 @@ export class TripsService {
     if (trip.background) {
       if (tripFound.backgroundProvider === ImageProvider.S3) {
         await this.removeTripThumbnail(tripId);
-        trip.backgroundProvider = ImageProvider.UNSPLASH;
+        trip.backgroundProvider = ImageProvider.EXTERNAL_SERVICE;
       }
     }
 
@@ -175,29 +172,17 @@ export class TripsService {
 
     if (!trip) throw new HttpException('Trip not found', 404);
 
-    const resizedImage = await this.resizeTripThumbnail(file, 500);
+    const resizedImage = await resizeThumbnail(file, 500);
     const resizedBuffer = await resizedImage.toBuffer();
 
-    const bucketParams = {
-      Bucket: this.config.get('BUCKET_NAME'),
-      Key: `trip_thumbnails/trip-${tripId}-thumbnail`,
-      Body: resizedBuffer,
-      ContentType: await resizedImage.metadata().then((x) => x.format),
-    };
-
-    const command = new PutObjectCommand(bucketParams);
-
-    const s3UploadResult = await this.s3Client.send(command);
-
-    if (s3UploadResult.$metadata.httpStatusCode !== 200) {
-      throw new InternalServerErrorException('Failed to upload thumbnail');
-    }
-
-    const thumbnailUrl = `https://${this.config.get(
-      'BUCKET_NAME',
-    )}.s3.${this.config.get(
-      'BUCKET_REGION',
-    )}.amazonaws.com/trip-${tripId}-thumbnail`;
+    const thumbnailUrl = await uploadToS3({
+      folder: 'trip_thumbnails',
+      fileName: `trip-${tripId}-thumbnail`,
+      resizedBuffer,
+      resizedImage,
+    }).catch((e) => {
+      throw new InternalServerErrorException(e);
+    });
 
     await this.prisma.trip.update({
       where: {
@@ -213,15 +198,10 @@ export class TripsService {
   }
 
   async getTripThumbnail(tripId: number): Promise<string> {
-    const bucketParams = {
-      Bucket: this.config.get('BUCKET_NAME'),
-      Key: `trip_thumbnails/trip-${tripId}-thumbnail`,
-    };
-
-    const command = new GetObjectCommand(bucketParams);
-    const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
-
-    return url;
+    return await getSignedImageUrl(
+      'trip_thumbnails',
+      `trip-${tripId}-thumbnail`,
+    );
   }
 
   async removeTripThumbnail(tripId: number): Promise<void> {
@@ -237,53 +217,5 @@ export class TripsService {
     if (s3DeleteResult.$metadata.httpStatusCode !== 204) {
       throw new InternalServerErrorException('Failed to delete thumbnail');
     }
-  }
-
-  async resizeTripThumbnail(
-    file: Express.Multer.File,
-    sizeLimitKb: number,
-    quality = 80,
-  ): Promise<sharp.Sharp> {
-    let compressedImage: sharp.Sharp;
-    let compressedSize: number;
-    let qualityValue = quality;
-
-    compressedImage = sharp(file.buffer)
-      .resize({
-        width: 500,
-        height: 500,
-        fit: 'cover',
-      })
-      .webp({
-        quality: qualityValue,
-      });
-
-    const size = await compressedImage.metadata().then((x) => x.size);
-
-    if (!size) throw new InternalServerErrorException('Failed to resize image');
-
-    compressedSize = size;
-    qualityValue -= 10;
-
-    while (compressedSize > sizeLimitKb * 1024) {
-      if (quality === 10) {
-        throw new InternalServerErrorException('Failed to resize image');
-      }
-
-      compressedImage = await sharp(await compressedImage.toBuffer()).webp({
-        quality: qualityValue,
-      });
-
-      const size = await compressedImage.metadata().then((x) => x.size);
-
-      if (!size) {
-        throw new InternalServerErrorException('Failed to resize image');
-      }
-
-      compressedSize = size;
-      qualityValue -= 10;
-    }
-
-    return compressedImage;
   }
 }

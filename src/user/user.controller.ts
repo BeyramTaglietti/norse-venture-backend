@@ -5,8 +5,11 @@ import {
   Get,
   Patch,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
@@ -41,6 +44,15 @@ export class UserController {
     @Body() body: ChangeUsernameDto,
   ): Promise<User> {
     return this.userService.setUsername(user, body.username);
+  }
+
+  @Patch('set_profile_picture')
+  @UseInterceptors(FileInterceptor('picture'))
+  setProfilePicture(
+    @GetUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.setProfilePicture(user, file);
   }
 
   @Get('username_available')

@@ -13,6 +13,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import verifyAppleToken from 'verify-apple-id-token';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import { Token } from './types';
+import { LoginResponse } from './types/login.type';
 
 @Injectable()
 export class AuthService {
@@ -90,31 +91,13 @@ export class AuthService {
     }
   }
 
-  async googleLogin(token: string): Promise<
-    Token & {
-      user: {
-        id: number;
-        email: string;
-        username: string;
-        picture: string;
-      };
-    }
-  > {
+  async googleLogin(token: string): Promise<LoginResponse> {
     const payload = await this.verifyGoogleToken(token);
 
     return await this.login(payload.email!, payload.picture);
   }
 
-  async appleLogin(token: string): Promise<
-    Token & {
-      user: {
-        id: number;
-        email: string;
-        username: string;
-        picture: string;
-      };
-    }
-  > {
+  async appleLogin(token: string): Promise<LoginResponse> {
     const payload = await verifyAppleToken({
       idToken: token,
       clientId: this.configService.get('APPLE_CLIENT_ID')!,
@@ -123,14 +106,7 @@ export class AuthService {
     return await this.login(payload.email);
   }
 
-  async login(
-    userEmail: string,
-    userPicture?: string,
-  ): Promise<
-    Token & {
-      user: { id: number; email: string; username: string; picture: string };
-    }
-  > {
+  async login(userEmail: string, userPicture?: string): Promise<LoginResponse> {
     const userExists = await this.prismaService.user.findUnique({
       where: {
         email: userEmail,
@@ -146,21 +122,7 @@ export class AuthService {
 
       this.updateRefreshToken(user.id, refresh_token);
 
-      const { id, email, username, picture } = user;
-
-      return {
-        access_token,
-        refresh_token,
-        user: { id, email, username, picture },
-      };
-    } else {
-      const { access_token, refresh_token } = this.generateTokens({
-        userId: userExists.id,
-      });
-
-      this.updateRefreshToken(userExists.id, refresh_token);
-
-      const { id, email, username, picture } = userExists;
+      const { id, email, username, profilePicture, updatedAt } = user;
 
       return {
         access_token,
@@ -169,7 +131,28 @@ export class AuthService {
           id,
           email,
           username,
-          picture,
+          profilePicture,
+          updatedAt,
+        },
+      };
+    } else {
+      const { access_token, refresh_token } = this.generateTokens({
+        userId: userExists.id,
+      });
+
+      this.updateRefreshToken(userExists.id, refresh_token);
+
+      const { id, email, username, profilePicture, updatedAt } = userExists;
+
+      return {
+        access_token,
+        refresh_token,
+        user: {
+          id,
+          email,
+          username,
+          profilePicture,
+          updatedAt,
         },
       };
     }
@@ -188,9 +171,7 @@ export class AuthService {
       const newUser = await this.prismaService.user.create({
         data: {
           email,
-          picture:
-            picture ??
-            'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
+          profilePicture: picture ?? '',
           username: generatedUsername,
         },
       });
