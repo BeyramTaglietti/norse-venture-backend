@@ -31,3 +31,4 @@ jobs:
           cd /home/ubuntu/norse_venture
           docker compose up -d backend
           docker compose exec backend pnpm migrate:prod
+          docker image prune
