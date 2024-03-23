@@ -32,4 +32,3 @@ jobs:
           docker compose up -d backend
           docker compose exec backend pnpm migrate:prod
           docker image prune -f
-          echo "y" | docker image prune
