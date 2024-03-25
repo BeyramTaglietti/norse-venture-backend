@@ -10,6 +10,9 @@ type randomUnsplashImages = {
     profile_image: {
       small: string;
     };
+    links: {
+      html: string;
+    };
   };
   links: {
     download_location: string;
@@ -53,6 +56,9 @@ export class UnsplashService {
               profile_image: {
                 small: image.user.profile_image.small,
               },
+              links: {
+                html: image.user.links.html,
+              },
             },
             links: {
               download_location: image.links.download_location,
@@ -72,6 +78,9 @@ export class UnsplashService {
               name: image.user.name,
               profile_image: {
                 small: image.user.profile_image.small,
+              },
+              links: {
+                html: image.user.links.html,
               },
             },
             links: {
